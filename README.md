@@ -2,7 +2,7 @@
 
 ## Preparation
 
-1. Download the zipped archive of the extension [here]([here](https://github.com/rosslibby/video-ad-skipper-extension/raw/refs/heads/main/bloody-awful-ad-skipper-extension.zip)).
+1. Download the zipped archive of the extension [here](https://github.com/rosslibby/video-ad-skipper-extension/raw/refs/heads/main/bloody-awful-ad-skipper-extension.zip).
 2. Unzip the downloaded file
 
 ## Browser setup:
