@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Skip those bloody awful ads",
+  "version": "0.1",
+  "description": "Skip video-advertisements in YouTube and Prime Video",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://www.amazon.com/gp/video/*",
+    "*://www.amazon.co.uk/gp/video/*",
+    "*://www.amazon.de/gp/video/*",
+    "*://www.amazon.co.jp/gp/video/*",
+    "*://www.amazon.in/gp/video/*",
+    "*://www.amazon.ca/gp/video/*",
+    "*://www.amazon.com/Prime-Video/*",
+    "*://www.amazon.co.uk/Prime-Video/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*",
+        "*://www.amazon.com/gp/video/*",
+        "*://www.amazon.co.uk/gp/video/*",
+        "*://www.amazon.de/gp/video/*",
+        "*://www.amazon.co.jp/gp/video/*",
+        "*://www.amazon.in/gp/video/*",
+        "*://www.amazon.ca/gp/video/*",
+        "*://www.amazon.com/Prime-Video/*",
+        "*://www.amazon.co.uk/Prime-Video/*"
+      ],
+      "js": ["browser-polyfill.min.js", "content.js"]
+    }
+  ],
+  "action": {
+    "default_title": "Layout Injector"
+  }
+}
