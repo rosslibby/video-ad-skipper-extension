@@ -18,7 +18,12 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.youtube.com/*",
+        "*://*.youtube.com/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/youtube.js"]
+    },
+    {
+      "matches": [
         "*://www.amazon.com/gp/video/*",
         "*://www.amazon.co.uk/gp/video/*",
         "*://www.amazon.de/gp/video/*",
@@ -28,7 +33,13 @@
         "*://www.amazon.com/Prime-Video/*",
         "*://www.amazon.co.uk/Prime-Video/*"
       ],
-      "js": ["browser-polyfill.min.js", "content.js"]
+      "js": ["browser-polyfill.min.js", "src/prime-video.js"]
+    },
+    {
+      "matches": [
+        "*://*.peacocktv.com/watch/playback/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/peacock.js"]
     }
   ],
   "action": {
