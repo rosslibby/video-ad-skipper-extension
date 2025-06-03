@@ -15,19 +15,6 @@ function skipAd(seconds) {
   showToast();
 }
 
-document.addEventListener('keydown', (event) => {
-  if (event.key === 's') {
-    const timeRemaining = document.querySelector(
-      'span[class*=-ad-timer-remaining-time]'
-    );
-    if (timeRemaining) {
-      const [min = 0, sec = 0] = timeRemaining.textContent.split(':');
-      const secondsRemaining = parseInt(min) * 60 + parseInt(sec);
-      skipAd(secondsRemaining);
-    }
-  }
-});
-
 const observer = new MutationObserver(() => {
   const timeRemaining = document.querySelector(
     'span[class*=-ad-timer-remaining-time]'
