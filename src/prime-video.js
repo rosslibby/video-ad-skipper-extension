@@ -1,6 +1,6 @@
 let skipCount = 0;
-const container = document.querySelector('#dv-web-player');
-const video = document.querySelector('video[src*=blob]');
+const container = document.querySelector('[id*=dv-web-player]');
+const video = container.querySelector('video[src*=blob]');
 const renderer = video.parentElement;
 video.controls = true;
 renderer.style.pointerEvents = 'initial';
