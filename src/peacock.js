@@ -2,6 +2,9 @@
  * url: *://*.peacocktv.com/watch/playback/*
  */
 
+const state = {
+  video: null,
+};
 let skipCount = 0;
 const video = document.querySelector('video');
 const timer = document.querySelector('.playback-ad-countdown__container');
@@ -12,20 +15,28 @@ const observer = new MutationObserver((mutations) => {
   for (const mutation of mutations) {
     for (const node of mutation.addedNodes) {
       if (node.nodeType === Node.ELEMENT_NODE) {
-        if (node.classList.contains('playback-ad-countdown__container')) {
-          const timeRemaining = Number(node.textContent);
-          video.currentTime += timeRemaining;
-          showToast();
-          observer.disconnect();
-          setTimeout(() => {
-            observer.observe(document.body, {
-              attributes: false,
-              childList: true,
-              subtree: true,
-              characterData: false,
-            });
-          }, 1000);
-          break;
+        if (node.nodeName === 'VIDEO') {
+          if (node.closest('.hero-wrapper')) {
+            continue;
+          } else {
+            state.video = node;
+          }
+        } else if (node.nodeName === 'DIV') {
+          if (node.classList.contains('playback-ad-countdown__container')) {
+            const timeRemaining = Number(node.textContent);
+            state.video.currentTime += timeRemaining;
+            showToast();
+            observer.disconnect();
+            setTimeout(() => {
+              observer.observe(document.body, {
+                attributes: false,
+                childList: true,
+                subtree: true,
+                characterData: false,
+              });
+            }, 1000);
+            break;
+          }
         }
       }
     }
