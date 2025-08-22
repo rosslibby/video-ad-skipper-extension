@@ -33,7 +33,7 @@
         "*://www.amazon.com/Prime-Video/*",
         "*://www.amazon.co.uk/Prime-Video/*"
       ],
-      "js": ["browser-polyfill.min.js", "src/prime-video-4.js"]
+      "js": ["browser-polyfill.min.js", "src/prime-video.js"]
     },
     {
       "matches": [
