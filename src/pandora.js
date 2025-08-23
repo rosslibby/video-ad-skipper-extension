@@ -7,14 +7,14 @@ const observer = new MutationObserver((mutations) => {
           console.log(`New audio node:`, audio, audio.duration, audio.muted);
 
           if (audio.src.includes('.adswizz.com')) {
-            audio.muted = true;
             audio.playbackRate = 16;
-            audio.currentTime = audio.duration - 1;
-            audio.onplay = () => {
-              if (Math.floor(audio.currentTime) === 0) {
-                audio.currentTime = audio.duration - 1;
-              }
-            };
+            audio.addEventListener('loadedmetadata', () => {
+              audio.currentTime = audio.duration - 1;
+            });
+            audio.addEventListener('playing', () => {
+              audio.muted = true;
+              audio.currentTime = audio.duration - 1;
+            });
           }
         }
       }
