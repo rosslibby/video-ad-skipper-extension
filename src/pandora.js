@@ -9,11 +9,13 @@ const observer = new MutationObserver((mutations) => {
           if (audio.src.includes('.adswizz.com')) {
             audio.playbackRate = 16;
             audio.addEventListener('loadedmetadata', () => {
+              console.log(`[AU.META]`, audio.currentTime, audio.duration, audio.muted)
               audio.currentTime = audio.duration - 1;
             });
             audio.addEventListener('playing', () => {
               audio.muted = true;
               audio.currentTime = audio.duration - 1;
+              console.log(`[AU.PLAYING]`, audio.muted, audio.duration, audio.currentTime)
             });
           }
         }
