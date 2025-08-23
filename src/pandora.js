@@ -13,10 +13,11 @@ const observer = new MutationObserver((mutations) => {
               audio.currentTime = audio.duration - 1;
             });
             audio.addEventListener('playing', () => {
-                console.log(`[AU.PLAYING]`, audio.muted, audio.duration, audio.currentTime)
+              console.log(`[AU.PLAYING]`, audio.muted, audio.duration, audio.currentTime)
               audio.pause();
               setTimeout(() => {
                 audio.currentTime = audio.duration - 1;
+                audio.play();
               });
             });
           }
