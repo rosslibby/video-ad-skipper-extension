@@ -13,7 +13,9 @@
     "*://www.amazon.in/gp/video/*",
     "*://www.amazon.ca/gp/video/*",
     "*://www.amazon.com/Prime-Video/*",
-    "*://www.amazon.co.uk/Prime-Video/*"
+    "*://www.amazon.co.uk/Prime-Video/*",
+    "*://*.peacocktv.com/watch/playback/*",
+    "*://www.pandora.com/station/play/*"
   ],
   "content_scripts": [
     {
@@ -21,6 +23,12 @@
         "*://*.youtube.com/*"
       ],
       "js": ["browser-polyfill.min.js", "src/youtube.js"]
+    },
+    {
+      "matches": [
+        "*://www.pandora.com/station/play/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/pandora.js"]
     },
     {
       "matches": [

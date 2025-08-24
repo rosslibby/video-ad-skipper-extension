@@ -61,7 +61,7 @@ function handleAdPlaying(e) {
 }
 
 function initialRun() {
-  const audios = Array.from(document.querySelectorAll('audio'))
+  Array.from(document.querySelectorAll('audio'))
     .forEach((audio) => {
       const isAdvertisement = audio.src.includes('.adswizz.com');
       if (isAdvertisement) {
