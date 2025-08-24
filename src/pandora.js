@@ -37,7 +37,9 @@ function addAudioNode(node) {
 }
 
 function removeAudioNode(audioId) {
-  const { ad, src } = state.audioNodes[audioId];
+  const node = state.audioNodes[audioId];
+  if (!node) return;
+  const { ad, src } = node;
   const prefix = ad ? 'ad:' : '';
   state.history.push(`${prefix} ${src}`);
   delete state.audioNodes[audioId];
