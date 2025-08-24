@@ -54,7 +54,7 @@ function handleAdPlaying(e) {
   const ad = e.target;
   ad.volume = 0.01;
   ad.pause();
-  ad.currentTime = ad.duration - 1;
+  ad.currentTime = ad.duration - 0.1;
   ad.playbackRate = 16;
   ad.removeEventListener('playing', handleAdPlaying);
   ad.play();
