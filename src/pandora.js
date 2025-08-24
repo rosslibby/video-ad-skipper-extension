@@ -52,6 +52,7 @@ function handleAudioTimeUpdate(audio) {
 function handleAdPlaying(e) {
   console.log(`⏰ time to skip an ad`);
   const ad = e.target;
+  ad.volume = 0.01;
   ad.pause();
   ad.currentTime = ad.duration - 1;
   ad.playbackRate = 16;
