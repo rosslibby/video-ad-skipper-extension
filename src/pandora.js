@@ -9,11 +9,12 @@ const observer = new MutationObserver((mutations) => {
       for (const addedNode of mutation.addedNodes) {
         if (addedNode.nodeName === 'AUDIO') {
           const audio = addedNode;
-          const audioId = addAudioNode(audio);
-          audio.addEventListener('ended', () => removeAudioNode(audioId))
 
           if (audio.src.includes('.adswizz.com')) {
             audio.addEventListener('playing', handleAdPlaying);
+          } else {
+            const audioId = addAudioNode(audio);
+            audio.addEventListener('ended', () => removeAudioNode(audioId));
           }
         }
       }
@@ -53,9 +54,29 @@ function handleAudioStarted(e) {
       artist: artistName,
       album: albumName,
     };
+    updateMetadata(details);
     const node = state.audioNodes[audioId] || {};
     state.audioNodes[audioId] = { ...node, ...details };
   }, 150);
+}
+
+function updateMetadata({
+  album, art, artist, name,
+}) {
+  const mediaSizes = [96, 128, 256, 512];
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: name,
+    artist: artist,
+    album: album,
+    artwork: Array.from(
+      { length: 4 },
+      (_, i) => ({
+        src: art,
+        sizes: [mediaSizes[i], mediaSizes[i]].join('x'),
+        type: `image/${art.split('.').pop()}`,
+      }),
+    ),
+  });
 }
 
 function removeAudioNode(audioId) {
@@ -73,25 +94,11 @@ function handleAudioTimeUpdate(audio) {
   }
 }
 
-function handleAdEnded(e) {
-  console.log(`😈 ad zapped`);
-  chrome.runtime.sendMessage({ action: 'unmuteTab' });
-}
-
 function handleAdPlaying(e) {
   console.log(`⚡️ zapping an ad`);
   const ad = e.target;
   ad.src = 'blob:nodedata:b5ed410e-b385-4bc4-b1ab-deadbcf050a8';
   ad.load();
-  // ad.volume = 0.01;
-  // ad.addEventListener('ended', handleAdEnded);
-  // chrome.runtime.sendMessage({ action: 'muteTab' });
-
-  // ad.pause();
-  // ad.currentTime = ad.duration - 0.15;
-  // ad.playbackRate = 16;
-  // ad.removeEventListener('playing', handleAdPlaying);
-  // ad.play();
 }
 
 function initialRun() {
