@@ -79,6 +79,29 @@ function updateMetadata({
   });
 }
 
+/** skip song */
+function getCurrentlyPlayingTrack() {
+  const playing = Array.from(document.querySelectorAll('audio')).find((a) => !a.paused)
+  return playing
+}
+function skipSong() {
+  const playing = getCurrentlyPlayingTrack();
+  playing.currentTime = playing.duration;
+}
+function restartSong() {
+  const playing = getCurrentlyPlayingTrack();
+  playing.currentTime = 0;
+}
+
+navigator.mediaSession.setActionHandler('seekforward', (e) => {
+  e.preventDefault();
+  skipSong();
+});
+navigator.mediaSession.setActionHandler('seekbackward', (e) => {
+  e.preventDefault();
+  restartSong();
+});
+
 function removeAudioNode(audioId) {
   const node = state.audioNodes[audioId];
   if (!node) return;
