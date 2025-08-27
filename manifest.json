@@ -15,9 +15,16 @@
     "*://www.amazon.com/Prime-Video/*",
     "*://www.amazon.co.uk/Prime-Video/*",
     "*://*.peacocktv.com/watch/playback/*",
-    "*://www.pandora.com/station/play/*"
+    "*://www.pandora.com/station/play/*",
+    "*://www.netflix.com/watch/*"
   ],
   "content_scripts": [
+    {
+      "matches": [
+        "*://www.netflix.com/watch/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/netflix.js"]
+    },
     {
       "matches": [
         "*://*.youtube.com/*"
