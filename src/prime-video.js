@@ -13,6 +13,7 @@ setupObserver.observe(document.body, {
 });
 function primeSetup() {
   let skipCount = 0;
+  let observing = false;
   const container = document.querySelector('[id*=dv-web-player]');
   const video = container.querySelector('video[src*=blob]');
   const renderer = video.parentElement;
@@ -53,12 +54,24 @@ function primeSetup() {
     }
   });
 
-  observer.observe(container, {
-    attributes: false,
-    childList: true,
-    subtree: true,
-    characterData: false,
-  });
+  video.addEventListener('playing', startObservingWhenVideoPlays);
+
+  function startObservingWhenVideoPlays(e) {
+    if (observing) {
+      return;
+    }
+
+    observing = true;
+
+    const video = e.target;
+    observer.observe(container, {
+      attributes: false,
+      childList: true,
+      subtree: true,
+      characterData: false,
+    });
+    video.removeEventListener('playing', startObservingWhenVideoPlays);
+  }
 
   function setupToast() {
     const styling = `.toast{animation: hidetoast 2.2s ease-in-out;backdrop-filter: blur(4px);background-color: #ffffff1c;border: 1px solid #ffffff1c;border-radius: 4px;box-shadow: 0 0 0 1px #0000000a, 0 0 8px 0 #0000000a inset;box-sizing: border-box;color: #ffffff;font-family: system-ui;font-weight: 200;height: max-content !important;left: 2rem;opacity: 0;padding: 8px 12px;position: absolute;top: 2rem;width: max-content !important;z-index: 9999}
