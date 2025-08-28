@@ -14,6 +14,7 @@ setupObserver.observe(document.body, {
 function primeSetup() {
   let skipCount = 0;
   let observing = false;
+  let keyboard = false;
   const container = document.querySelector('[id*=dv-web-player]');
   const video = container.querySelector('video[src*=blob]');
   const renderer = video.parentElement;
@@ -100,7 +101,11 @@ function primeSetup() {
   }
 
   function handleKeyDown(e) {
-    if (['ArrowLeft', 'ArrowRight', ' ', 'p'].includes(e.key)) {
+    if (!keyboard) {
+      if (e.key === 'k') {
+        keyboard = !keyboard;
+      }
+    } else if (['ArrowLeft', 'ArrowRight', ' ', 'p'].includes(e.key)) {
       e.preventDefault();
 
       const video = document.querySelector('video[src*=blob]');
