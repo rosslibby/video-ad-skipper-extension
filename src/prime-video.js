@@ -99,12 +99,30 @@ function primeSetup() {
     setTimeout(() => toast.remove(), 2201);
   }
 
-  document.addEventListener('keypress', (e) => {
-    if (e.key === 'p') {
+  function handleKeyDown(e) {
+    if (['ArrowLeft', 'ArrowRight', ' ', 'p'].includes(e.key)) {
       e.preventDefault();
-      if (!document.pictureInPictureElement) {
-        video.requestPictureInPicture();
+
+      const video = document.querySelector('video[src*=blob]');
+
+      if (e.key === 'ArrowLeft') {
+        video.currentTime -= 10;
+      } else if (e.key === 'ArrowRight') {
+        video.currentTime += 10;
+      } else if (e.key === ' ') {
+        if (video.paused) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      } else if (e.key === 'p') {
+        if (document.pictureInPictureElement) {
+          document.exitPictureInPicture();
+        } else {
+          video.requestPictureInPicture();
+        }
       }
     }
-  });
+  }
+  document.addEventListener('keydown', handleKeyDown)
 }
