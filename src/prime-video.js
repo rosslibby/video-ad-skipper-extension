@@ -101,11 +101,11 @@ function primeSetup() {
   }
 
   function handleKeyDown(e) {
-    if (!keyboard) {
-      if (e.key === 'k') {
-        keyboard = !keyboard;
-      }
-    } else if (['ArrowLeft', 'ArrowRight', ' ', 'p'].includes(e.key)) {
+    if (e.key === 'k') {
+      keyboard = !keyboard;
+    }
+
+    if (keyboard && ['ArrowLeft', 'ArrowRight', ' ', 'p'].includes(e.key)) {
       e.preventDefault();
 
       const video = document.querySelector('video[src*=blob]');
