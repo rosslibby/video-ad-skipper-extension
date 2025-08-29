@@ -103,9 +103,15 @@ function primeSetup() {
   function handleKeyDown(e) {
     if (e.key === 'k') {
       keyboard = !keyboard;
+    } else if (e.key === 'p') {
+      if (document.pictureInPictureElement) {
+        document.exitPictureInPicture();
+      } else {
+        video.requestPictureInPicture();
+      }
     }
 
-    if (keyboard && ['ArrowLeft', 'ArrowRight', ' ', 'p'].includes(e.key)) {
+    if (keyboard && ['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
       e.preventDefault();
 
       const video = document.querySelector('video[src*=blob]');
@@ -119,12 +125,6 @@ function primeSetup() {
           video.play();
         } else {
           video.pause();
-        }
-      } else if (e.key === 'p') {
-        if (document.pictureInPictureElement) {
-          document.exitPictureInPicture();
-        } else {
-          video.requestPictureInPicture();
         }
       }
     }
