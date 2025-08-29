@@ -111,7 +111,7 @@ function primeSetup() {
       }
     }
 
-    if (keyboard && ['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+    if (keyboard && ['ArrowLeft', 'ArrowRight', ' ', 'f'].includes(e.key)) {
       e.preventDefault();
 
       const video = document.querySelector('video[src*=blob]');
@@ -125,6 +125,10 @@ function primeSetup() {
           video.play();
         } else {
           video.pause();
+        }
+      } else if (e.key === 'f') {
+        if (!document.fullscreenElement) {
+          video.requestFullscreen();
         }
       }
     }
