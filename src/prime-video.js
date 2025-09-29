@@ -43,15 +43,15 @@ function primeSetup() {
       const [min = 0, sec = 0] = timeRemaining.textContent.split(':');
       const secondsRemaining = parseInt(min) * 60 + parseInt(sec);
       skipAd(secondsRemaining);
-      observer.disconnect();
-      setTimeout(() => {
-        observer.observe(container, {
-          attributes: false,
-          childList: true,
-          subtree: true,
-          characterData: false,
-        });
-      }, 1000);
+      // observer.disconnect();
+      // setTimeout(() => {
+      //   observer.observe(container, {
+      //     attributes: false,
+      //     childList: true,
+      //     subtree: true,
+      //     characterData: false,
+      //   });
+      // }, 1000);
     }
   });
 
