@@ -21,16 +21,31 @@ function primeSetup() {
   video.controls = true;
   renderer.style.pointerEvents = 'initial';
 
-  function skipAd(seconds) {
-    /**
-     * Skip by the specified seconds + 1 to ensure the ad's
-     * playback is over
-     */
-    video.muted = true;
+  async function skipSegment(seconds) {
+    skipCount++;
     console.log(`[${skipCount}] Skipping ahead by ${seconds} seconds`);
-    video.currentTime += seconds + 1;
-    video.muted = false;
     showToast();
+    document.querySelector('video[src*=blob]').currentTime += seconds;
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(), 250);
+    })
+  }
+
+  async function skip() {
+    const timeRemaining = document.querySelector(
+      'span[class*=-ad-timer-remaining-time]'
+    );
+    const [min = 0, sec = 0] = timeRemaining.textContent.split(':');
+    const secondsRemaining = parseInt(min) * 60 + parseInt(sec);
+    const increments = Math.ceil(secondsRemaining / 30);
+    const remainder = secondsRemaining % 30 - 1;
+    const times = Array.from({ length: increments }, (_, i) => {
+      if (i < increments - 1) return 30;
+      return remainder;
+    });
+    for (const t of times) {
+      await skipSegment(t);
+    }
   }
 
   const observer = new MutationObserver(() => {
@@ -39,39 +54,29 @@ function primeSetup() {
     );
 
     if (timeRemaining) {
-      skipCount++;
-      const [min = 0, sec = 0] = timeRemaining.textContent.split(':');
-      const secondsRemaining = parseInt(min) * 60 + parseInt(sec);
-      skipAd(secondsRemaining);
-      observer.disconnect();
-      setTimeout(() => {
-        observer.observe(container, {
-          attributes: false,
-          childList: true,
-          subtree: true,
-          characterData: false,
-        });
-      }, 1000);
+      skip();
     }
   });
 
-  video.addEventListener('playing', startObservingWhenVideoPlays);
+  function toggleObserver() {
+    observing = !observing;
+    console.log(`♻️ [${Date.now()}] Recycling observer: ${observing ? 'on' : 'off'}`);
+    if (observing) {
+      observer.observe(container, {
+        attributes: false,
+        childList: true,
+        subtree: true,
+        characterData: false,
+      });
+    } else {
+      observer.disconnect();
+    }
+  }
+
+  video.addEventListener('play', startObservingWhenVideoPlays);
 
   function startObservingWhenVideoPlays(e) {
-    if (observing) {
-      return;
-    }
-
-    observing = true;
-
-    const video = e.target;
-    observer.observe(container, {
-      attributes: false,
-      childList: true,
-      subtree: true,
-      characterData: false,
-    });
-    video.removeEventListener('playing', startObservingWhenVideoPlays);
+    toggleObserver();
   }
 
   function setupToast() {
@@ -109,6 +114,8 @@ function primeSetup() {
       } else {
         video.requestPictureInPicture();
       }
+    } else if (e.key === 'o') {
+      toggleObserver();
     }
 
     if (keyboard && ['ArrowLeft', 'ArrowRight', ' ', 'f'].includes(e.key)) {
