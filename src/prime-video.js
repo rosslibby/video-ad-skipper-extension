@@ -1,5 +1,6 @@
-let skipCount = 0;
 const state = {
+  skipCount: 0,
+  video: null,
   timer: false,
   video: null,
   container: null,
@@ -41,21 +42,25 @@ function makeToast() {
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.innerText = 'Skipped ad';
-  const label = `Skipped ad #${skipCount}`;
+  const label = `Skipped ad #${state.skipCount}`;
   toast.innerText = label;
   return toast;
 }
 
 function showToast() {
   const video = document.querySelector('video[src*=blob]');
-  const toast = makeToast();
-  video.parentElement.appendChild(toast);
-  setTimeout(() => toast.remove(), 2201);
+  if (video) {
+    const toast = makeToast();
+    video.parentElement.appendChild(toast);
+    setTimeout(() => toast.remove(), 2201);
+  } else {
+    console.log(`❌ video not found:`, video)
+  }
 }
 
 async function skipSegment(seconds) {
-  skipCount++;
-  console.log(`[${skipCount}] Skipping ahead by ${seconds} seconds`);
+  state.skipCount++;
+  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds`);
   showToast();
   document.querySelector('video[src*=blob]').currentTime += seconds;
   return new Promise((resolve) => {
@@ -91,7 +96,7 @@ const adContainerObserver = new MutationObserver((mutations) => {
     if (mutation.type === 'childList') {
       console.log(`⏰ Ad timer detected:`, mutation.target);
       skip(mutation.target);
-    } else {
+    } else if (mutation.type === 'characterData') {
       console.log(mutation.type, mutation.target.textContent)
     }
   })
@@ -107,8 +112,10 @@ const setContainers = (video) => {
       childList: true,
       attributes: true,
       characterData: true,
-    })
+    });
+    skip(adContainer);
   } else {
+    console.log('Containers already set!', state)
   }
 }
 
@@ -124,7 +131,24 @@ const initobserver = new MutationObserver((mutations) => {
       if (mutation.target.nodeName === 'VIDEO') {
         const video = mutation.target;
         trackItem('video', mutation);
+        video.setAttribute('data-video-id', mutation.type)
         video.addEventListener('play', videoPlaying);
+        video.addEventListener('timeupdate', timeUpdate);
+        state.video = video;
+      }
+    } else if (mutation.type === 'childList') {
+      const video = mutation.target.querySelector('video');
+      if (video && !state.video) {
+        const vid = video.dataset.videoId;
+        if (vid) {
+          return;
+        } else {
+          video.setAttribute('data-video-id', mutation.type)
+          video.addEventListener('play', videoPlaying);
+          video.addEventListener('timeupdate', timeUpdate);
+          state.video = video;
+          initobserver.disconnect();
+        }
       }
     }
   });
@@ -135,3 +159,49 @@ initobserver.observe(document.body, {
   childList: true,
   subtree: true,
 });
+
+function timeUpdate(e) {
+  const video = e.target;
+  if (state.skipCount && video.currentTime < 60) {
+    state.skipCount = 0;
+  }
+}
+
+// keys
+function handleKeyDown(e) {
+  const video = document.querySelector('video[src*=blob]');
+  if (!video) return;
+
+  if (e.key === 'k') {
+    state.keyboard = !state.keyboard;
+  } else if (e.key === 'p') {
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture();
+    } else {
+      video.requestPictureInPicture();
+    }
+  }
+
+  if (state.keyboard && ['ArrowLeft', 'ArrowRight', ' ', 'f'].includes(e.key)) {
+    e.preventDefault();
+
+    const video = document.querySelector('video[src*=blob]');
+
+    if (e.key === 'ArrowLeft') {
+      video.currentTime -= 10;
+    } else if (e.key === 'ArrowRight') {
+      video.currentTime += 10;
+    } else if (e.key === ' ') {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    } else if (e.key === 'f') {
+      if (!document.fullscreenElement) {
+        video.requestFullscreen();
+      }
+    }
+  }
+}
+document.addEventListener('keydown', handleKeyDown);
