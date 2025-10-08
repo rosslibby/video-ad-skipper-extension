@@ -1,61 +1,31 @@
-let skipCount = 0;
-const container = document.querySelector('#dv-web-player');
-const video = document.querySelector('video[src*=blob]');
-const renderer = video.parentElement;
-video.controls = true;
-renderer.style.pointerEvents = 'initial';
+const state = {
+  skipCount: 0,
+  video: null,
+  timer: false,
+  video: null,
+  container: null,
+  adContainer: null,
+};
 
-function skipAd(seconds) {
-  /**
-   * Skip by the specified seconds + 1 to ensure the ad's
-   * playback is over
-   */
-  console.log(`[${skipCount}] Skipping ahead by ${seconds} seconds`);
-  video.currentTime += seconds + 1;
-  showToast();
+const toggleTimer = () => {
+  state.timer = !state.timer;
 }
 
-document.addEventListener('keydown', (event) => {
-  if (event.key === 's') {
-    const timeRemaining = document.querySelector(
-      'span[class*=-ad-timer-remaining-time]'
-    );
-    if (timeRemaining) {
-      const [min = 0, sec = 0] = timeRemaining.textContent.split(':');
-      const secondsRemaining = parseInt(min) * 60 + parseInt(sec);
-      skipAd(secondsRemaining);
-    }
-  }
-});
+const tracker = {
+  video: [],
+  container: [],
+  timer: [],
+};
 
-const observer = new MutationObserver(() => {
-  const timeRemaining = document.querySelector(
-    'span[class*=-ad-timer-remaining-time]'
-  );
-
-  if (timeRemaining) {
-    skipCount++;
-    const [min = 0, sec = 0] = timeRemaining.textContent.split(':');
-    const secondsRemaining = parseInt(min) * 60 + parseInt(sec);
-    skipAd(secondsRemaining);
-    observer.disconnect();
-    setTimeout(() => {
-      observer.observe(container, {
-        attributes: false,
-        childList: true,
-        subtree: true,
-        characterData: false,
-      });
-    }, 1000);
-  }
-});
-
-observer.observe(container, {
-  attributes: false,
-  childList: true,
-  subtree: true,
-  characterData: false,
-});
+const trackItem = (key, mutation) => {
+  const payload = {
+    type: mutation.type,
+    prev: mutation.oldValue,
+    current: mutation.target.outerHTML,
+    time: Date.now(),
+  };
+  tracker[key].push(payload);
+};
 
 function setupToast() {
   const styling = `.toast{animation: hidetoast 2.2s ease-in-out;backdrop-filter: blur(4px);background-color: #ffffff1c;border: 1px solid #ffffff1c;border-radius: 4px;box-shadow: 0 0 0 1px #0000000a, 0 0 8px 0 #0000000a inset;box-sizing: border-box;color: #ffffff;font-family: system-ui;font-weight: 200;height: max-content !important;left: 2rem;opacity: 0;padding: 8px 12px;position: absolute;top: 2rem;width: max-content !important;z-index: 9999}
@@ -72,37 +42,166 @@ function makeToast() {
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.innerText = 'Skipped ad';
-  const label = `Skipped ad #${skipCount}`;
+  const label = `Skipped ad #${state.skipCount}`;
   toast.innerText = label;
   return toast;
 }
 
 function showToast() {
-  const toast = makeToast();
-  video.parentElement.appendChild(toast);
-  setTimeout(() => toast.remove(), 2201);
+  const video = document.querySelector('video[src*=blob]');
+  if (video) {
+    const toast = makeToast();
+    video.parentElement.appendChild(toast);
+    setTimeout(() => toast.remove(), 2201);
+  } else {
+    console.log(`❌ video not found:`, video)
+  }
 }
 
-/**
- * Pre-empt ad skipping
- */
+async function skipSegment(seconds) {
+  state.skipCount++;
+  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds`);
+  showToast();
+  document.querySelector('video[src*=blob]').currentTime += seconds;
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(), 100);
+  })
+}
 
-function prepareAdSkips() {
-  const placements = Array.from(document.querySelectorAll('div[class*=tick-mark]')).map(
-    (tick) => parseFloat(tick.style.left)
-  );
-  video.addEventListener('timeupdate', () => {
-    const min = Math.floor(video.currentTime / 60);
-    const sec = video.currentTime % 60;
+async function skip(timer) {
+  if (!timer.textContent) return;
+  const seconds = timer.textContent
+    .match(/(\d+):(\d+)/g)[0]
+    .split(':').map(Number)
+    .reduce((acc, n, i) => {
+      if (i === 0) return acc + n * 60;
+      return acc + n;
+    }, 0);
+  const increments = Math.ceil(seconds / 30);
+  const remainder = seconds % 30;
+  const times = Array.from({ length: increments }, (_, i) => {
+    if (i < increments - 1) return 30;
+    return remainder;
+  });
+  for (const t of times) {
+    await skipSegment(t);
+    if (state.timer && t < 30) {
+      toggleTimer();
+    }
+  }
+}
 
-    const playback = video.currentTime / video.duration * 100;
-    const placement = placements.find(
-      (tick) => playback >= tick && playback < tick + 1
-    );
-    if (placement) {
-      console.log(`Time to skip an ad: ${min}:${sec} --> ${video.currentTime / video.duration} <-> ${placement}`);
+const adContainerObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'childList') {
+      console.log(`⏰ Ad timer detected:`, mutation.target);
+      skip(mutation.target);
+    } else if (mutation.type === 'characterData') {
+      console.log(mutation.type, mutation.target.textContent)
+    }
+  })
+});
+
+const setContainers = (video) => {
+  if (!state.container && !state.adContainer) {
+    const container = video.closest('[id*=dv-web-player]');
+    const adContainer = document.querySelector('.atvwebplayersdk-ad-timer-countdown');
+    state.container = container;
+    state.adContainer = adContainer;
+    adContainerObserver.observe(adContainer, {
+      childList: true,
+      attributes: true,
+      characterData: true,
+    });
+    skip(adContainer);
+  } else {
+    console.log('Containers already set!', state)
+  }
+}
+
+function videoPlaying(e) {
+  const video = e.target;
+  setContainers(video);
+}
+
+console.clear();
+const initobserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'attributes' || mutation.type == 'characterData') {
+      if (mutation.target.nodeName === 'VIDEO') {
+        const video = mutation.target;
+        trackItem('video', mutation);
+        video.setAttribute('data-video-id', mutation.type)
+        video.addEventListener('play', videoPlaying);
+        video.addEventListener('timeupdate', timeUpdate);
+        state.video = video;
+      }
+    } else if (mutation.type === 'childList') {
+      const video = mutation.target.querySelector('video');
+      if (video && !state.video) {
+        const vid = video.dataset.videoId;
+        if (vid) {
+          return;
+        } else {
+          video.setAttribute('data-video-id', mutation.type)
+          video.addEventListener('play', videoPlaying);
+          video.addEventListener('timeupdate', timeUpdate);
+          state.video = video;
+          initobserver.disconnect();
+        }
+      }
     }
   });
+});
+initobserver.observe(document.body, {
+  attributes: true,
+  characterData: true,
+  childList: true,
+  subtree: true,
+});
+
+function timeUpdate(e) {
+  const video = e.target;
+  if (state.skipCount && video.currentTime < 60) {
+    state.skipCount = 0;
+  }
 }
 
-prepareAdSkips();
+// keys
+function handleKeyDown(e) {
+  const video = document.querySelector('video[src*=blob]');
+  if (!video) return;
+
+  if (e.key === 'k') {
+    state.keyboard = !state.keyboard;
+  } else if (e.key === 'p') {
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture();
+    } else {
+      video.requestPictureInPicture();
+    }
+  }
+
+  if (state.keyboard && ['ArrowLeft', 'ArrowRight', ' ', 'f'].includes(e.key)) {
+    e.preventDefault();
+
+    const video = document.querySelector('video[src*=blob]');
+
+    if (e.key === 'ArrowLeft') {
+      video.currentTime -= 10;
+    } else if (e.key === 'ArrowRight') {
+      video.currentTime += 10;
+    } else if (e.key === ' ') {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    } else if (e.key === 'f') {
+      if (!document.fullscreenElement) {
+        video.requestFullscreen();
+      }
+    }
+  }
+}
+document.addEventListener('keydown', handleKeyDown);

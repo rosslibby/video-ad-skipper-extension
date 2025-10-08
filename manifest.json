@@ -3,7 +3,7 @@
   "name": "Skip those bloody awful ads",
   "version": "0.1",
   "description": "Skip video-advertisements in YouTube and Prime Video",
-  "permissions": ["scripting", "activeTab"],
+  "permissions": ["scripting", "activeTab", "tabs"],
   "host_permissions": [
     "*://*.youtube.com/*",
     "*://www.amazon.com/gp/video/*",
@@ -13,12 +13,32 @@
     "*://www.amazon.in/gp/video/*",
     "*://www.amazon.ca/gp/video/*",
     "*://www.amazon.com/Prime-Video/*",
-    "*://www.amazon.co.uk/Prime-Video/*"
+    "*://www.amazon.co.uk/Prime-Video/*",
+    "*://*.peacocktv.com/watch/playback/*",
+    "*://www.pandora.com/station/play/*",
+    "*://www.netflix.com/watch/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "*://*.youtube.com/*",
+        "*://www.netflix.com/watch/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/netflix.js"]
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/youtube.js"]
+    },
+    {
+      "matches": [
+        "*://www.pandora.com/station/play/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/pandora.js"]
+    },
+    {
+      "matches": [
         "*://www.amazon.com/gp/video/*",
         "*://www.amazon.co.uk/gp/video/*",
         "*://www.amazon.de/gp/video/*",
@@ -28,9 +48,18 @@
         "*://www.amazon.com/Prime-Video/*",
         "*://www.amazon.co.uk/Prime-Video/*"
       ],
-      "js": ["browser-polyfill.min.js", "content.js"]
+      "js": ["browser-polyfill.min.js", "src/prime-video.js"]
+    },
+    {
+      "matches": [
+        "*://*.peacocktv.com/watch/playback/*"
+      ],
+      "js": ["browser-polyfill.min.js", "src/peacock.js"]
     }
   ],
+  "background": {
+    "service_worker": "src/pandora-background.js"
+  },
   "action": {
     "default_title": "Layout Injector"
   }

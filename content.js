@@ -65,16 +65,6 @@ function initializeSkipUtil(video) {
  * set up for youtube only at this point
  */
 const observer = new MutationObserver((mutations) => {
-  const hostname = window.location.hostname;
-  const video = findActiveVideo();
-
-  if (!hostname.includes('youtube.com')) {
-    /**
-     * Not on YouTube; nothing to do
-     */
-    return;
-  }
-
   for (const mutation of mutations) {
     let initialized = false;
 
