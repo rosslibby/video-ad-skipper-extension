@@ -1,3 +1,5 @@
+console.clear();
+
 const state = {
   skipCount: 0,
   video: null,
@@ -106,6 +108,7 @@ const setContainers = (video) => {
   if (!state.container && !state.adContainer) {
     const container = video.closest('[id*=dv-web-player]');
     const adContainer = document.querySelector('.atvwebplayersdk-ad-timer-countdown');
+    console.log(`Initializing containers:`, container, adContainer)
     state.container = container;
     state.adContainer = adContainer;
     adContainerObserver.observe(adContainer, {
@@ -124,7 +127,6 @@ function videoPlaying(e) {
   setContainers(video);
 }
 
-console.clear();
 const initobserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (mutation.type === 'attributes' || mutation.type == 'characterData') {
