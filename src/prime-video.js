@@ -51,6 +51,14 @@ function makeToast() {
   return toast;
 }
 
+function makeInitToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  const label = message;
+  toast.innerText = label;
+  return toast;
+}
+
 function showToast() {
   const video = document.querySelector('video[src*=blob]');
   if (video) {
@@ -125,9 +133,15 @@ const setContainers = (video) => {
       attributes: true,
       characterData: true,
     });
+    const toast = makeInitToast(`⚡️ Ad zap initialized`)
+    container.appendChild(toast)
     skip(adContainer);
+    setTimeout(() => toast.remove(), 2201);
   } else {
+    const toast = makeInitToast(`⚡️ Ad zap already initialized`)
+    state.container?.appendChild(toast)
     console.log('Containers already set!', state)
+    setTimeout(() => toast.remove(), 2201);
   }
 }
 
