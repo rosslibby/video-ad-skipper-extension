@@ -1,3 +1,5 @@
+console.clear();
+
 const state = {
   skipCount: 0,
   video: null,
@@ -8,6 +10,8 @@ const state = {
 };
 
 const toggleTimer = () => {
+  const nextTimerState = !state.timer
+  console.log(`Toggling timer from ${state.timer} to ${nextTimerState}`)
   state.timer = !state.timer;
 }
 
@@ -47,6 +51,14 @@ function makeToast() {
   return toast;
 }
 
+function makeInitToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  const label = message;
+  toast.innerText = label;
+  return toast;
+}
+
 function showToast() {
   const video = document.querySelector('video[src*=blob]');
   if (video) {
@@ -58,18 +70,25 @@ function showToast() {
   }
 }
 
-async function skipSegment(seconds) {
+async function skipSegment(seconds, startTime) {
+  const currentTime = Date.now()
+  const elapsed = currentTime - startTime
+
   state.skipCount++;
-  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds`);
+  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds\n --> ${elapsed}ms elapsed`);
   showToast();
   document.querySelector('video[src*=blob]').currentTime += seconds;
   return new Promise((resolve) => {
-    setTimeout(() => resolve(), 100);
+    setTimeout(() => resolve(), 140);
   })
 }
 
 async function skip(timer) {
   if (!timer.textContent) return;
+
+  const startTime = Date.now()
+
+  console.log(`⏱️ total duration: ${timer.querySelector('.atvwebplayersdk-ad-timer-remaining-time')?.textContent}`)
   const seconds = timer.textContent
     .match(/(\d+):(\d+)/g)[0]
     .split(':').map(Number)
@@ -84,7 +103,7 @@ async function skip(timer) {
     return remainder;
   });
   for (const t of times) {
-    await skipSegment(t);
+    await skipSegment(t, startTime);
     if (state.timer && t < 30) {
       toggleTimer();
     }
@@ -106,6 +125,7 @@ const setContainers = (video) => {
   if (!state.container && !state.adContainer) {
     const container = video.closest('[id*=dv-web-player]');
     const adContainer = document.querySelector('.atvwebplayersdk-ad-timer-countdown');
+    console.log(`Initializing containers:`, container, adContainer)
     state.container = container;
     state.adContainer = adContainer;
     adContainerObserver.observe(adContainer, {
@@ -113,9 +133,15 @@ const setContainers = (video) => {
       attributes: true,
       characterData: true,
     });
+    const toast = makeInitToast(`⚡️ Ad zap initialized`)
+    container.appendChild(toast)
     skip(adContainer);
+    setTimeout(() => toast.remove(), 2201);
   } else {
+    const toast = makeInitToast(`⚡️ Ad zap already initialized`)
+    state.container?.appendChild(toast)
     console.log('Containers already set!', state)
+    setTimeout(() => toast.remove(), 2201);
   }
 }
 
@@ -124,7 +150,6 @@ function videoPlaying(e) {
   setContainers(video);
 }
 
-console.clear();
 const initobserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (mutation.type === 'attributes' || mutation.type == 'characterData') {
