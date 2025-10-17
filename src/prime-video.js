@@ -10,6 +10,8 @@ const state = {
 };
 
 const toggleTimer = () => {
+  const nextTimerState = !state.timer
+  console.log(`Toggling timer from ${state.timer} to ${nextTimerState}`)
   state.timer = !state.timer;
 }
 
@@ -60,18 +62,25 @@ function showToast() {
   }
 }
 
-async function skipSegment(seconds) {
+async function skipSegment(seconds, startTime) {
+  const currentTime = Date.now()
+  const elapsed = currentTime - startTime
+
   state.skipCount++;
-  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds`);
+  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds\n --> ${elapsed}ms elapsed`);
   showToast();
   document.querySelector('video[src*=blob]').currentTime += seconds;
   return new Promise((resolve) => {
-    setTimeout(() => resolve(), 100);
+    setTimeout(() => resolve(), 140);
   })
 }
 
 async function skip(timer) {
   if (!timer.textContent) return;
+
+  const startTime = Date.now()
+
+  console.log(`⏱️ total duration: ${timer.querySelector('.atvwebplayersdk-ad-timer-remaining-time')?.textContent}`)
   const seconds = timer.textContent
     .match(/(\d+):(\d+)/g)[0]
     .split(':').map(Number)
@@ -86,7 +95,7 @@ async function skip(timer) {
     return remainder;
   });
   for (const t of times) {
-    await skipSegment(t);
+    await skipSegment(t, startTime);
     if (state.timer && t < 30) {
       toggleTimer();
     }
