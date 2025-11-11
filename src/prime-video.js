@@ -1,6 +1,8 @@
+const _consoleDebug = console.debug
 console.clear();
 
 const state = {
+  debug: false,
   skipCount: 0,
   video: null,
   timer: false,
@@ -9,9 +11,13 @@ const state = {
   adContainer: null,
 };
 
+// enable debug-only logging
+const debugLogger = (...args) => state.debug && _consoleDebug(`🐞`, ...args)
+console.debug = debugLogger
+
 const toggleTimer = () => {
   const nextTimerState = !state.timer
-  console.log(`Toggling timer from ${state.timer} to ${nextTimerState}`)
+  console.debug(`Toggling timer from ${state.timer} to ${nextTimerState}`)
   state.timer = !state.timer;
 }
 
@@ -66,7 +72,7 @@ function showToast() {
     video.parentElement.appendChild(toast);
     setTimeout(() => toast.remove(), 2201);
   } else {
-    console.log(`❌ video not found:`, video)
+    console.debug(`❌ video not found:`, video)
   }
 }
 
@@ -75,7 +81,7 @@ async function skipSegment(seconds, startTime) {
   const elapsed = currentTime - startTime
 
   state.skipCount++;
-  console.log(`[${state.skipCount}] Skipping ahead by ${seconds} seconds\n --> ${elapsed}ms elapsed`);
+  console.debug(`[${state.skipCount}] Skipping ahead by ${seconds} seconds\n --> ${elapsed}ms elapsed`);
   showToast();
   document.querySelector('video[src*=blob]').currentTime += seconds;
   return new Promise((resolve) => {
@@ -88,7 +94,7 @@ async function skip(timer) {
 
   const startTime = Date.now()
 
-  console.log(`⏱️ total duration: ${timer.querySelector('.atvwebplayersdk-ad-timer-remaining-time')?.textContent}`)
+  console.debug(`⏱️ total duration: ${timer.querySelector('.atvwebplayersdk-ad-timer-remaining-time')?.textContent}`)
   const seconds = timer.textContent
     .match(/(\d+):(\d+)/g)[0]
     .split(':').map(Number)
@@ -113,10 +119,10 @@ async function skip(timer) {
 const adContainerObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (mutation.type === 'childList') {
-      console.log(`⏰ Ad timer detected:`, mutation.target);
+      console.debug(`⏰ Ad timer detected:`, mutation.target);
       skip(mutation.target);
     } else if (mutation.type === 'characterData') {
-      console.log(mutation.type, mutation.target.textContent)
+      console.debug(mutation.type, mutation.target.textContent)
     }
   })
 });
@@ -125,7 +131,7 @@ const setContainers = (video) => {
   if (!state.container && !state.adContainer) {
     const container = video.closest('[id*=dv-web-player]');
     const adContainer = document.querySelector('.atvwebplayersdk-ad-timer-countdown');
-    console.log(`Initializing containers:`, container, adContainer)
+    console.debug(`Initializing containers:`, container, adContainer)
     state.container = container;
     state.adContainer = adContainer;
     adContainerObserver.observe(adContainer, {
@@ -140,7 +146,7 @@ const setContainers = (video) => {
   } else {
     const toast = makeInitToast(`⚡️ Ad zap already initialized`)
     state.container?.appendChild(toast)
-    console.log('Containers already set!', state)
+    console.info('Containers already set!', state)
     setTimeout(() => toast.remove(), 2201);
   }
 }
