@@ -119,7 +119,8 @@ function getActualTime() {
   if (!infoEl || !info) {
     console.debug(
       `⚠️ Failed to get actual times: ` +
-      `Time indicator element does not exist`
+      `Time indicator element does not exist`,
+      infoEl, info
     )
 
     return actualTimes
