@@ -80,6 +80,7 @@ function durationChange(e) {
     .map(parseDuration)
   console.debug(`🎬 duration diff: ${prevDiff} --> ${currDiff}`)
   trackDuration(e, 'duration-changed')
+  scheduleNextAd(video)
 }
 
 function parseDuration(seconds) {
@@ -133,4 +134,32 @@ function getActualTime() {
 
     return actualTimes
   }
+}
+
+function getTickWidth() {
+  const ticks = document.querySelectorAll('[class*="tick-mark"]')
+  const [tickWidth] = Array.from(ticks)
+    .map((tick) => tick.offsetWidth)
+    .sort((a, b) => a - b)
+  return tickWidth
+}
+
+function getSeekbarWidth() {
+  // subtract cumulative widths of ticks to get the playback width of
+  // the seekbar
+  const tickWidth = getTickWidth()
+  const bar = document.querySelector('.atvwebplayersdk-seekbar-container')
+  const seekWidth = bar.offsetWidth - ticks.length * tickWidth
+  return seekWidth
+}
+
+function scheduleNextAd(video) {
+  const seekbarWidth = seekbarWidthSansTicks()
+  const nextTick = document.querySelector('.atvwebplayersdk-tick-mark')
+  const adPlaysAtTime = video.duration * (nextTick.offsetLeft / seekbarWidth)
+  const remaining = (adPlaysAtTime - video.currentTime) * 1000
+  console.log(`🎬 ⏱ Set timer for ${remaining}ms in the future`)
+  setTimeout(() => {
+    alert('Ad commencing!')
+  }, remaining)
 }
