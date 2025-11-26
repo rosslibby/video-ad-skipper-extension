@@ -48,7 +48,15 @@
         "*://www.amazon.com/Prime-Video/*",
         "*://www.amazon.co.uk/Prime-Video/*"
       ],
-      "js": ["browser-polyfill.min.js", "src/prime-video.js"]
+      "js": [
+        "browser-polyfill.min.js",
+        "src/prime/init.js",
+        "src/prime/controls.js",
+        "src/prime/toast.js",
+        "src/prime/setup.js",
+        "src/prime/duration-tracking.js",
+        "src/prime/ad-skipper.js"
+      ]
     },
     {
       "matches": [
