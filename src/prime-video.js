@@ -149,6 +149,8 @@ const setContainers = (video) => {
     console.info('Containers already set!', state)
     setTimeout(() => toast.remove(), 2201);
   }
+
+  video.removeEventListener('play', videoPlaying)
 }
 
 function videoPlaying(e) {
