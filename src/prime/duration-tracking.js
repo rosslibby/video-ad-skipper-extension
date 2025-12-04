@@ -136,18 +136,23 @@ function getActualTime() {
   }
 }
 
-function getTickWidth() {
-  const ticks = document.querySelectorAll('[class*="tick-mark"]')
+function getTickWidth(ticks) {
   const [tickWidth] = Array.from(ticks)
     .map((tick) => tick.offsetWidth)
     .sort((a, b) => a - b)
   return tickWidth
 }
 
+function getTicks() {
+  const ticks = document.querySelectorAll('[class*="tick-mark"]')
+  const width = getTickWidth(ticks)
+  return { ticks, width }
+}
+
 function getSeekbarWidth() {
   // subtract cumulative widths of ticks to get the playback width of
   // the seekbar
-  const tickWidth = getTickWidth()
+  const { ticks, width: tickWidth } = getTicks()
   const bar = document.querySelector('.atvwebplayersdk-seekbar-container')
   const seekWidth = bar.offsetWidth - ticks.length * tickWidth
   return seekWidth
@@ -156,10 +161,13 @@ function getSeekbarWidth() {
 function scheduleNextAd(video) {
   const seekbarWidth = getSeekbarWidth()
   const nextTick = document.querySelector('.atvwebplayersdk-tick-mark')
-  const adPlaysAtTime = video.duration * (nextTick.offsetLeft / seekbarWidth)
-  const remaining = (adPlaysAtTime - video.currentTime) * 1000
-  console.log(`🎬 ⏱ Set timer for ${remaining}ms in the future`)
-  setTimeout(() => {
-    alert('Ad commencing!')
-  }, remaining)
+
+  if (nextTick) {
+    const adPlaysAtTime = video.duration * (nextTick.offsetLeft / seekbarWidth)
+    const remaining = (adPlaysAtTime - video.currentTime) * 1000
+    console.log(`🎬 ⏱ Set timer for ${remaining}ms in the future`)
+    setTimeout(() => {
+      alert('Ad commencing!')
+    }, remaining)
+  }
 }
