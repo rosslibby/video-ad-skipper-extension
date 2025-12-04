@@ -81,6 +81,8 @@ const setContainers = (video) => {
     createToast(`⚡️ Ad zap already initialized`, state.container)
     console.info('Containers already set!', state)
   }
+
+  video.removeEventListener('play', videoPlaying)
 }
 
 function videoPlaying(e) {
@@ -92,35 +94,27 @@ function videoPlaying(e) {
 }
 
 const initobserver = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    if (mutation.type === 'attributes' || mutation.type == 'characterData') {
-      if (mutation.target.nodeName === 'VIDEO') {
-        const video = mutation.target;
-        trackItem('video', mutation);
-        video.setAttribute('data-video-id', mutation.type)
-        video.addEventListener('play', videoPlaying);
-        video.addEventListener('durationchange', durationChange);
-        video.addEventListener('timeupdate', timeUpdate);
-        state.video = video;
-      }
-    } else if (mutation.type === 'childList') {
-      const video = mutation.target.querySelector('video');
-      if (video && !state.video) {
-        const vid = video.dataset.videoId;
-        if (vid) {
-          return;
-        } else {
-          video.setAttribute('data-video-id', mutation.type)
-          video.addEventListener('play', videoPlaying);
-          video.addEventListener('durationchange', durationChange);
-          video.addEventListener('timeupdate', timeUpdate);
-          state.video = video;
-          initobserver.disconnect();
-        }
-      }
+  const validUrl = window.location.pathname.startsWith('/gp/video/detail')
+
+  if (!validUrl) {
+    console.log(`⚠️ [ad-skipper:initobserver] URL is not valid; cancelling run`)
+    return
+  } else {
+    console.log(`✅ [ad-skipper:initobserver] URL is valid\n👀 Looking for valid video[src]...`)
+    const video = document.querySelector('video[src]')
+    if (video) {
+      video.setAttribute('data-video-id', crypto.randomUUID());
+      video.addEventListener('play', videoPlaying);
+      video.addEventListener('durationchange', durationChange);
+      video.addEventListener('timeupdate', timeUpdate);
+      state.video = video;
+      console.log(`✅ [ad-skipper:initobserver] URL is valid; running`)
+      console.log(`🛑 [ad-skipper:disconnect] Video tracked; disconnecting...`, video)
+      initobserver.disconnect()
     }
-  });
+  }
 });
+console.log('🐞[B1] Setting up initObserver...')
 initobserver.observe(document.body, {
   attributes: true,
   characterData: true,
