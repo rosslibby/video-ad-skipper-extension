@@ -154,7 +154,7 @@ function getSeekbarWidth() {
 }
 
 function scheduleNextAd(video) {
-  const seekbarWidth = seekbarWidthSansTicks()
+  const seekbarWidth = getSeekbarWidth()
   const nextTick = document.querySelector('.atvwebplayersdk-tick-mark')
   const adPlaysAtTime = video.duration * (nextTick.offsetLeft / seekbarWidth)
   const remaining = (adPlaysAtTime - video.currentTime) * 1000
