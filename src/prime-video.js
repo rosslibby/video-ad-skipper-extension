@@ -163,14 +163,17 @@ const initobserver = new MutationObserver((mutations) => {
     if (mutation.type === 'attributes' || mutation.type == 'characterData') {
       if (mutation.target.nodeName === 'VIDEO') {
         const video = mutation.target;
-        trackItem('video', mutation);
-        video.setAttribute('data-video-id', mutation.type)
-        video.addEventListener('play', videoPlaying);
-        video.addEventListener('timeupdate', timeUpdate);
-        state.video = video;
+
+        if (video.src) {
+          trackItem('video', mutation);
+          video.setAttribute('data-video-id', mutation.type)
+          video.addEventListener('play', videoPlaying);
+          video.addEventListener('timeupdate', timeUpdate);
+          state.video = video;
+        }
       }
     } else if (mutation.type === 'childList') {
-      const video = mutation.target.querySelector('video');
+      const video = mutation.target.querySelector('video[src]');
       if (video && !state.video) {
         const vid = video.dataset.videoId;
         if (vid) {
