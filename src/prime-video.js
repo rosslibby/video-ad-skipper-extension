@@ -159,21 +159,30 @@ function videoPlaying(e) {
 }
 
 const initobserver = new MutationObserver((mutations) => {
+  const validUrl = window.location.pathname.startsWith('/gp/video/detail')
+
+  if (!validUrl) {
+    console.log(`⚠️ [prime-video:initobserver] URL is not valid; cancelling run`)
+    return
+  } else {
+    console.log(`✅ [prime-video:initobserver] URL is valid; running`)
+  }
+
   mutations.forEach((mutation) => {
     if (mutation.type === 'attributes' || mutation.type == 'characterData') {
       if (mutation.target.nodeName === 'VIDEO') {
+        console.log(`🐞 [prime-video:video[attrs]] Video attrs. mutated`)
         const video = mutation.target;
 
-        if (video.src) {
-          trackItem('video', mutation);
-          video.setAttribute('data-video-id', mutation.type)
-          video.addEventListener('play', videoPlaying);
-          video.addEventListener('timeupdate', timeUpdate);
-          state.video = video;
-        }
+        trackItem('video', mutation);
+        video.setAttribute('data-video-id', mutation.type)
+        video.addEventListener('play', videoPlaying);
+        video.addEventListener('timeupdate', timeUpdate);
+        state.video = video;
       }
     } else if (mutation.type === 'childList') {
       const video = mutation.target.querySelector('video[src]');
+      console.log(`🐞 [prime-video:+video] Video added:`, video)
       if (video && !state.video) {
         const vid = video.dataset.videoId;
         if (vid) {
@@ -189,6 +198,7 @@ const initobserver = new MutationObserver((mutations) => {
     }
   });
 });
+console.log('🐞[A1] Setting up initObserver...')
 initobserver.observe(document.body, {
   attributes: true,
   characterData: true,
