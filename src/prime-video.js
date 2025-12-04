@@ -143,13 +143,12 @@ const setContainers = (video) => {
     container.appendChild(toast)
     skip(adContainer);
     setTimeout(() => toast.remove(), 2201);
+  } else {
+    const toast = makeInitToast(`⚡️ Ad zap already initialized`)
+    state.container?.appendChild(toast)
+    console.info('Containers already set!', state)
+    setTimeout(() => toast.remove(), 2201);
   }
-  // else {
-  //   const toast = makeInitToast(`⚡️ Ad zap already initialized`)
-  //   state.container?.appendChild(toast)
-  //   console.info('Containers already set!', state)
-  //   setTimeout(() => toast.remove(), 2201);
-  // }
 }
 
 function videoPlaying(e) {
