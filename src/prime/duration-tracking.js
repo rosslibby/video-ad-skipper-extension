@@ -167,8 +167,8 @@ function scheduleNextAd(video) {
     const adPlaysAtTime = video.duration * (nextTick.offsetLeft / seekbarWidth)
     const remaining = (adPlaysAtTime - video.currentTime) * 1000
     console.log(`🎬 ⏱ Set timer for ${remaining}ms in the future`)
-    setTimeout(() => {
-      alert('Ad commencing!')
-    }, remaining)
+    // setTimeout(() => {
+    //   alert('Ad commencing!')
+    // }, remaining)
   }
 }
